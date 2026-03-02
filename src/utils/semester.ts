@@ -16,7 +16,7 @@ export interface SemesterColors {
 }
 
 export function getSemesterColors(semester: string): SemesterColors {
-  if (semester.startsWith('Fall')) return { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' };
+  if (semester.startsWith('Fall')) return { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-200' };
   if (semester.startsWith('Spring')) return { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' };
   // Summer
   return { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200' };
