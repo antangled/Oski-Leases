@@ -10,9 +10,11 @@ import { SearchX } from 'lucide-react';
 interface Props {
   allListings: Listing[];
   referencePoint: ReferencePoint;
+  isSaved?: (id: string) => boolean;
+  toggleSaved?: (id: string) => void;
 }
 
-export default function DashboardView({ allListings, referencePoint }: Props) {
+export default function DashboardView({ allListings, referencePoint, isSaved, toggleSaved }: Props) {
   const { listings, filters, setFilters, sortOption, setSortOption, resetFilters } =
     useFilters(allListings, referencePoint);
   const [selectedListing, setSelectedListing] = useState<EnrichedListing | null>(null);
@@ -20,7 +22,7 @@ export default function DashboardView({ allListings, referencePoint }: Props) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-dark">Browse Listings</h1>
+        <h1 className="font-display text-3xl md:text-4xl text-dark italic">Browse Listings</h1>
         <p className="text-base text-dark/50 mt-2">
           Find the perfect sublease near campus
         </p>
@@ -40,7 +42,7 @@ export default function DashboardView({ allListings, referencePoint }: Props) {
           <p className="text-dark/50 font-medium text-lg">No listings match your filters</p>
           <button
             onClick={resetFilters}
-            className="mt-3 text-sm text-teal hover:text-teal-dark transition-colors bg-transparent border-none cursor-pointer underline"
+            className="mt-3 text-sm text-gold hover:text-gold-dark transition-colors bg-transparent border-none cursor-pointer underline font-semibold"
           >
             Clear all filters
           </button>
@@ -53,6 +55,8 @@ export default function DashboardView({ allListings, referencePoint }: Props) {
               listing={listing}
               rank={index + 1}
               onClick={() => setSelectedListing(listing)}
+              isSaved={isSaved?.(listing.id)}
+              onToggleSaved={toggleSaved}
             />
           ))}
         </div>
@@ -62,6 +66,8 @@ export default function DashboardView({ allListings, referencePoint }: Props) {
         <ListingDetailModal
           listing={selectedListing}
           onClose={() => setSelectedListing(null)}
+          isSaved={isSaved?.(selectedListing.id)}
+          onToggleSaved={toggleSaved}
         />
       )}
     </div>

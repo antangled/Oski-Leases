@@ -18,13 +18,13 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
   const hasActiveFilters = Object.values(filters).some((v) => v !== null);
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-dark/10">
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-dark/8">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-semibold text-dark">Filters</h3>
         {hasActiveFilters && (
           <button
             onClick={onReset}
-            className="flex items-center gap-1 text-xs text-teal-dark hover:text-teal transition-colors bg-transparent border-none cursor-pointer"
+            className="flex items-center gap-1 text-xs text-gold-dark hover:text-gold transition-colors bg-transparent border-none cursor-pointer font-semibold"
           >
             <RotateCcw size={12} />
             Reset
@@ -41,7 +41,7 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
               placeholder="$min"
               value={filters.priceMin ?? ''}
               onChange={(e) => update('priceMin', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-dark/15 rounded-lg focus:outline-none focus:border-teal bg-white text-dark"
+              className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-dark"
             />
             <span className="text-dark/30">&ndash;</span>
             <input
@@ -49,7 +49,7 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
               placeholder="$max"
               value={filters.priceMax ?? ''}
               onChange={(e) => update('priceMax', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-dark/15 rounded-lg focus:outline-none focus:border-teal bg-white text-dark"
+              className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-dark"
             />
           </div>
         </div>
@@ -63,7 +63,7 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
               placeholder="min"
               value={filters.distanceMin ?? ''}
               onChange={(e) => update('distanceMin', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-dark/15 rounded-lg focus:outline-none focus:border-teal bg-white text-dark"
+              className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-dark"
             />
             <span className="text-dark/30">&ndash;</span>
             <input
@@ -72,7 +72,7 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
               placeholder="max"
               value={filters.distanceMax ?? ''}
               onChange={(e) => update('distanceMax', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-dark/15 rounded-lg focus:outline-none focus:border-teal bg-white text-dark"
+              className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-dark"
             />
           </div>
         </div>
@@ -84,14 +84,14 @@ export default function FilterBar({ filters, onChange, onReset }: Props) {
               type="date"
               value={filters.dateStart ?? ''}
               onChange={(e) => update('dateStart', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-dark/15 rounded-lg focus:outline-none focus:border-teal bg-white text-dark"
+              className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-dark"
             />
             <span className="text-dark/30">&ndash;</span>
             <input
               type="date"
               value={filters.dateEnd ?? ''}
               onChange={(e) => update('dateEnd', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-dark/15 rounded-lg focus:outline-none focus:border-teal bg-white text-dark"
+              className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-dark"
             />
           </div>
         </div>

@@ -1,6 +1,9 @@
 export interface Listing {
   id: string;
+  title: string;
   price: number;
+  bedrooms: number;
+  bathrooms: number;
   location: {
     address: string;
     lat: number;
@@ -13,10 +16,17 @@ export interface Listing {
   imageUrl: string;
   images: string[];
   listerName: string;
+  listerRelationship: string;
   description: string;
+  rentalRequirements: string;
   contactEmail: string;
   contactPhone: string;
   createdAt: string;
+  furnished?: boolean;
+  utilitiesIncluded?: boolean;
+  roommates?: number;
+  isBoosted?: boolean;
+  isVerified?: boolean;
 }
 
 export interface EnrichedListing extends Listing {

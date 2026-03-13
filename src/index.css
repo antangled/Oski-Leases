@@ -1,13 +1,20 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
 
 @theme {
-  --color-dark: #17252A;
-  --color-teal-dark: #2B7A78;
-  --color-teal: #3AAFA9;
-  --color-mint: #DEF2F1;
-  --color-white: #FEFFFF;
+  --color-dark: #003262;
+  --color-berkeley-blue: #003262;
+  --color-berkeley-blue-light: #004785;
+  --color-teal-dark: #004785;
+  --color-teal: #FDB515;
+  --color-gold: #FDB515;
+  --color-gold-dark: #C4931A;
+  --color-mint: #F5F0E6;
+  --color-cream: #F5F0E6;
+  --color-white: #FFFFFF;
 
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: 'Nunito Sans', 'Inter', sans-serif;
+  --font-display: 'Instrument Serif', Georgia, serif;
 }
 
 html, body, #root {
@@ -16,6 +23,22 @@ html, body, #root {
   background-color: var(--color-mint);
   color: var(--color-dark);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Display headings */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Subtle grain texture overlay for premium feel */
+.grain-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* MapLibre overrides */
@@ -33,11 +56,30 @@ html, body, #root {
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.2s ease;
 }
 
-.maplibre-listing-marker:hover,
-.maplibre-marker-active {
+.maplibre-listing-marker:hover {
   transform: scale(1.35);
   z-index: 10 !important;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 0 8px rgba(253, 181, 21, 0.8))
+          drop-shadow(0 0 16px rgba(253, 181, 21, 0.5));
+}
+
+.maplibre-marker-active {
+  transform: scale(1.5);
+  z-index: 10 !important;
+  filter: drop-shadow(0 0 10px rgba(253, 181, 21, 0.9))
+          drop-shadow(0 0 20px rgba(253, 181, 21, 0.6));
+  animation: pinGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes pinGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(253, 181, 21, 0.9))
+            drop-shadow(0 0 16px rgba(253, 181, 21, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(253, 181, 21, 1))
+            drop-shadow(0 0 24px rgba(253, 181, 21, 0.8));
+  }
 }
 
 .maplibre-ref-marker {
@@ -87,4 +129,69 @@ html, body, #root {
 
 .animate-modal-in {
   animation: modalIn 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Staggered card entrance */
+@keyframes cardReveal {
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-card-reveal {
+  animation: cardReveal 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Shimmer for featured badge */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-shimmer {
+  background-size: 200% auto;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Drone-shot Ken Burns animation for hero image */
+@keyframes droneShot {
+  0% {
+    transform: scale(1.15) translateY(4%);
+  }
+  50% {
+    transform: scale(1.25) translateY(-2%);
+  }
+  100% {
+    transform: scale(1.15) translateY(4%);
+  }
+}
+
+.animate-drone-shot {
+  animation: droneShot 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Initial reveal for drone image */
+@keyframes droneReveal {
+  from { opacity: 0; transform: scale(1.3) translateY(6%); }
+  to { opacity: 1; transform: scale(1.15) translateY(4%); }
+}
+
+.animate-drone-reveal {
+  animation: droneReveal 1.5s cubic-bezier(0.22, 1, 0.36, 1) both,
+             droneShot 20s ease-in-out 1.5s infinite;
+}
+
+/* Gold accent bar */
+.gold-accent {
+  position: relative;
+}
+
+.gold-accent::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #FDB515, transparent);
 }

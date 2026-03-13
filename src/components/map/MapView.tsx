@@ -18,10 +18,10 @@ interface Props {
 interface ColorStop { t: number; r: number; g: number; b: number }
 
 const COLOR_STOPS: ColorStop[] = [
-  { t: 0.0, r: 23, g: 37, b: 42 },
-  { t: 0.35, r: 43, g: 122, b: 120 },
-  { t: 0.65, r: 58, g: 175, b: 169 },
-  { t: 1.0, r: 222, g: 242, b: 241 },
+  { t: 0.0, r: 0, g: 50, b: 98 },      // Berkeley Blue #003262
+  { t: 0.35, r: 0, g: 71, b: 133 },     // Lighter blue #004785
+  { t: 0.65, r: 253, g: 181, b: 21 },   // Cal Gold #FDB515
+  { t: 1.0, r: 245, g: 240, b: 230 },   // Cream #F5F0E6
 ];
 
 function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
@@ -40,7 +40,7 @@ function getMarkerColor(distanceMiles: number) {
   const color = interpolateColor(t);
   const m = color.match(/rgb\((\d+),(\d+),(\d+)\)/);
   const lum = m ? (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255 : 0;
-  return { fill: color, textColor: lum < 0.5 ? '#FEFFFF' : '#17252A' };
+  return { fill: color, textColor: lum < 0.5 ? '#FFFFFF' : '#003262' };
 }
 
 function getMarkerSize(price: number): number {
@@ -66,7 +66,7 @@ function createMarkerEl(price: number, distanceMiles: number, listingId: string)
   el.style.height = totalH + 'px';
   el.innerHTML = `<svg width="${totalW}" height="${totalH}" viewBox="${-pad} ${-pad} ${size + pad * 2} ${h + pad * 2}" xmlns="http://www.w3.org/2000/svg">
     <path d="M${size / 2} 0 C${size * 0.775} 0 ${size} ${size * 0.225} ${size} ${size * 0.5} C${size} ${h * 0.673} ${size / 2} ${h} ${size / 2} ${h} C${size / 2} ${h} 0 ${h * 0.673} 0 ${size * 0.5} C0 ${size * 0.225} ${size * 0.225} 0 ${size / 2} 0Z"
-          fill="${fill}" stroke="#17252A" stroke-width="1.5"/>
+          fill="${fill}" stroke="#003262" stroke-width="1.5"/>
     <text x="${size / 2}" y="${size * 0.575}" text-anchor="middle" fill="${textColor}"
           font-size="${size * 0.25}" font-weight="700" font-family="Inter,sans-serif">${priceLabel}</text>
   </svg>`;
@@ -86,9 +86,9 @@ function createRefMarkerEl(): HTMLElement {
   el.style.height = totalH + 'px';
   el.innerHTML = `<svg width="${totalW}" height="${totalH}" viewBox="${-pad} ${-pad} ${size + pad * 2} ${h + pad * 2}" xmlns="http://www.w3.org/2000/svg">
     <path d="M${size / 2} 0 C${size * 0.775} 0 ${size} ${size * 0.225} ${size} ${size * 0.5} C${size} ${h * 0.673} ${size / 2} ${h} ${size / 2} ${h} C${size / 2} ${h} 0 ${h * 0.673} 0 ${size * 0.5} C0 ${size * 0.225} ${size * 0.225} 0 ${size / 2} 0Z"
-          fill="#E53E3E" stroke="#17252A" stroke-width="2"/>
+          fill="#FDB515" stroke="#003262" stroke-width="2"/>
     <circle cx="${size / 2}" cy="${size * 0.45}" r="${size * 0.18}" fill="#17252A"/>
-    <circle cx="${size / 2}" cy="${size * 0.45}" r="${size * 0.08}" fill="#E53E3E"/>
+    <circle cx="${size / 2}" cy="${size * 0.45}" r="${size * 0.08}" fill="#FDB515"/>
   </svg>`;
   return el;
 }
@@ -223,49 +223,43 @@ export default function MapView({ listings, referencePoint, onReferencePointChan
     });
   }, []);
 
-  // Auto-scroll sidebar and highlight pin on hover
+  // Highlight pin on hover (no auto-scroll — scroll wheel only)
   useEffect(() => {
-    if (hoveredListingId) {
-      const sidebarEl = document.getElementById(`sidebar-${hoveredListingId}`);
-      sidebarEl?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      highlightPin(hoveredListingId);
-    } else {
-      highlightPin(null);
-    }
+    highlightPin(hoveredListingId);
   }, [hoveredListingId, highlightPin]);
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-mint overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-lg border border-dark/8 overflow-hidden">
       {/* Legend bar */}
-      <div className="bg-white border-b border-mint px-6 py-3.5 flex flex-wrap items-center gap-5 text-xs text-dark/70">
+      <div className="bg-white border-b border-dark/8 px-6 py-3.5 flex flex-wrap items-center gap-5 text-xs text-dark/70">
         <div className="flex items-center gap-2 font-semibold text-dark text-sm">
-          <MapPin size={16} className="text-teal" />
+          <MapPin size={16} className="text-gold" />
           {enrichedListings.length} listings
         </div>
         <div className="flex items-center gap-2">
           <span className="inline-block w-3 h-3 rounded-full bg-dark" />
           Closer
           <span className="mx-1">&rarr;</span>
-          <span className="inline-block w-3 h-3 rounded-full bg-teal" />
-          <span className="inline-block w-3 h-3 rounded-full bg-mint border border-dark/20" />
+          <span className="inline-block w-3 h-3 rounded-full bg-gold" />
+          <span className="inline-block w-3 h-3 rounded-full bg-cream border border-dark/20" />
           Farther
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-4 h-4 rounded-full bg-teal-dark" />
+          <span className="inline-block w-4 h-4 rounded-full bg-dark" />
           Bigger = cheaper
           <span className="mx-1">&rarr;</span>
-          <span className="inline-block w-2.5 h-2.5 rounded-full bg-teal-dark" />
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-dark" />
           Smaller = pricier
         </div>
 
         {/* Semester filter dropdown */}
         <div className="ml-auto flex items-center gap-2">
-          <GraduationCap size={14} className="text-teal-dark" />
+          <GraduationCap size={14} className="text-dark" />
           <div className="relative">
             <select
               value={semesterFilter}
               onChange={(e) => setSemesterFilter(e.target.value)}
-              className="appearance-none bg-white border border-dark/15 rounded-lg px-3 py-1.5 pr-7 text-xs font-medium text-dark cursor-pointer focus:outline-none focus:border-teal"
+              className="appearance-none bg-white border border-dark/15 rounded-lg px-3 py-1.5 pr-7 text-xs font-medium text-dark cursor-pointer focus:outline-none focus:border-gold"
             >
               <option value="all">All Semesters</option>
               {semesters.map((s) => (
@@ -282,8 +276,8 @@ export default function MapView({ listings, referencePoint, onReferencePointChan
         <div ref={mapContainerRef} className="flex-1 h-full" />
 
         {/* Scrollable listing sidebar */}
-        <div className="w-80 border-l border-mint bg-white overflow-y-auto shrink-0">
-          <div className="p-3 border-b border-mint bg-mint/30">
+        <div className="w-80 border-l border-dark/8 bg-white overflow-y-auto shrink-0">
+          <div className="p-3 border-b border-dark/8 bg-cream/50">
             <p className="text-xs font-semibold text-dark/60 uppercase tracking-wide">
               All Listings
             </p>
@@ -299,7 +293,7 @@ export default function MapView({ listings, referencePoint, onReferencePointChan
                 key={listing.id}
                 id={`sidebar-${listing.id}`}
                 className={`p-3 border-b border-dark/5 cursor-pointer transition-all duration-150 ${
-                  isHovered ? 'bg-teal/5 border-l-4 border-l-teal' : 'border-l-4 border-l-transparent hover:bg-dark/3'
+                  isHovered ? 'bg-gold/5 border-l-4 border-l-gold' : 'border-l-4 border-l-transparent hover:bg-dark/[0.02]'
                 }`}
                 onMouseEnter={() => {
                   setHoveredListingId(listing.id);
@@ -317,15 +311,23 @@ export default function MapView({ listings, referencePoint, onReferencePointChan
                     className="w-20 h-16 rounded-lg object-cover shrink-0"
                   />
                   <div className="flex-1 min-w-0">
+                    {/* Title */}
+                    {listing.title && (
+                      <p className="text-xs font-bold text-dark truncate mb-0.5">{listing.title}</p>
+                    )}
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-sm font-bold text-dark">
                         ${listing.price.toLocaleString()}
                         <span className="text-[10px] text-dark/40 font-normal ml-0.5">/mo</span>
                       </span>
-                      <span className="text-[10px] font-bold text-teal-dark bg-teal/10 px-1.5 py-0.5 rounded-full">
+                      <span className="text-[10px] font-bold text-dark bg-gold/15 px-1.5 py-0.5 rounded-full">
                         {score}%
                       </span>
                     </div>
+                    {/* BD / BA */}
+                    <p className="text-[10px] text-dark/50 mb-0.5">
+                      {listing.bedrooms === 0 ? 'Studio' : `${listing.bedrooms} BD`} | {listing.bathrooms} BA
+                    </p>
                     <p className="text-[11px] text-dark/60 truncate mb-1">{listing.location.address}</p>
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${semColors.bg} ${semColors.text}`}>

@@ -27,7 +27,7 @@ export default function SortControls({ sortOption, onChange, resultCount }: Prop
         <select
           value={sortOption}
           onChange={(e) => onChange(e.target.value as SortOption)}
-          className="text-sm bg-white border border-mint rounded-lg px-3 py-1.5 focus:outline-none focus:border-teal text-dark cursor-pointer"
+          className="text-sm bg-white border border-dark/12 rounded-lg px-3 py-1.5 focus:outline-none focus:border-gold text-dark cursor-pointer"
         >
           {Object.entries(sortLabels).map(([value, label]) => (
             <option key={value} value={value}>
