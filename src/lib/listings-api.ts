@@ -30,6 +30,13 @@ interface ListingRow {
   roommates?: number;
   is_boosted?: boolean;
   is_verified?: boolean;
+  lister_profile_pic?: string;
+  lister_bio?: string;
+  gender_preference?: string;
+  room_size?: string;
+  highlights?: string[];
+  pet_policy?: string;
+  floor_plan_url?: string;
 }
 
 /** Convert a DB row → Listing interface */
@@ -63,6 +70,13 @@ function rowToListing(row: ListingRow): Listing {
     roommates: row.roommates,
     isBoosted: row.is_boosted,
     isVerified: row.is_verified,
+    listerProfilePic: row.lister_profile_pic,
+    listerBio: row.lister_bio,
+    genderPreference: row.gender_preference as Listing['genderPreference'],
+    roomSize: row.room_size,
+    highlights: row.highlights,
+    petPolicy: row.pet_policy as Listing['petPolicy'],
+    floorPlanUrl: row.floor_plan_url,
   };
 }
 
@@ -93,6 +107,13 @@ function listingToRow(listing: Listing): ListingRow {
     roommates: listing.roommates,
     is_boosted: listing.isBoosted,
     is_verified: listing.isVerified,
+    lister_profile_pic: listing.listerProfilePic,
+    lister_bio: listing.listerBio,
+    gender_preference: listing.genderPreference,
+    room_size: listing.roomSize,
+    highlights: listing.highlights,
+    pet_policy: listing.petPolicy,
+    floor_plan_url: listing.floorPlanUrl,
   };
 }
 
@@ -124,6 +145,13 @@ export async function fetchAllListings(): Promise<Listing[]> {
       listing.roommates ??= seed.roommates;
       listing.isBoosted ??= seed.isBoosted;
       listing.isVerified ??= seed.isVerified;
+      listing.listerProfilePic ??= seed.listerProfilePic;
+      listing.listerBio ??= seed.listerBio;
+      listing.genderPreference ??= seed.genderPreference;
+      listing.roomSize ??= seed.roomSize;
+      listing.highlights ??= seed.highlights;
+      listing.petPolicy ??= seed.petPolicy;
+      listing.floorPlanUrl ??= seed.floorPlanUrl;
     }
   }
 

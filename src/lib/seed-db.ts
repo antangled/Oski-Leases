@@ -42,6 +42,13 @@ export async function seedDatabaseIfEmpty(): Promise<void> {
     roommates: l.roommates,
     is_boosted: l.isBoosted,
     is_verified: l.isVerified,
+    lister_profile_pic: l.listerProfilePic,
+    lister_bio: l.listerBio,
+    gender_preference: l.genderPreference,
+    room_size: l.roomSize,
+    highlights: l.highlights,
+    pet_policy: l.petPolicy,
+    floor_plan_url: l.floorPlanUrl,
   }));
 
   await supabase.from('listings').insert(rows);

@@ -6,7 +6,8 @@ import { computeOptimalityScore } from '../../utils/scoring';
 import MapView from '../map/MapView';
 import ListingCard from '../dashboard/ListingCard';
 import ListingDetailModal from '../dashboard/ListingDetailModal';
-import { Sparkles, ArrowRight, Shield, Zap, FileText, Search } from 'lucide-react';
+import NewToBerkeleyModal from '../onboarding/NewToBerkeleyModal';
+import { Sparkles, ArrowRight, Shield, Zap, FileText, Search, Users, Award, HelpCircle } from 'lucide-react';
 
 interface Props {
   listings: Listing[];
@@ -18,6 +19,9 @@ interface Props {
 
 export default function HomePage({ listings, referencePoint, onReferencePointChange, isSaved, toggleSaved }: Props) {
   const [selectedListing, setSelectedListing] = useState<EnrichedListing | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('oskilease-hide-welcome');
+  });
 
   const topListings: EnrichedListing[] = useMemo(() => {
     return listings
@@ -53,7 +57,7 @@ export default function HomePage({ listings, referencePoint, onReferencePointCha
             <div>
               <div className="inline-flex items-center gap-2 bg-gold/10 text-gold px-3 py-1.5 rounded-full text-xs font-semibold mb-5 border border-gold/20">
                 <Shield size={13} />
-                Berkeley Students Only
+                Berkeley Community Verified
               </div>
 
               <h1 className="font-display text-4xl md:text-5xl lg:text-6xl text-white leading-[1.1] mb-4">
@@ -63,8 +67,8 @@ export default function HomePage({ listings, referencePoint, onReferencePointCha
               </h1>
 
               <p className="text-base md:text-lg text-white/60 max-w-lg mb-8 leading-relaxed">
-                The trusted sublease marketplace for Cal students. Browse verified listings,
-                connect directly with subletters, and move in fast.
+                The trusted sublease marketplace built on mutual connections. See shared clubs,
+                vouches from Cal students, and verified profiles — not just listings from strangers.
               </p>
 
               {/* Quick Filter Chips */}
@@ -113,8 +117,17 @@ export default function HomePage({ listings, referencePoint, onReferencePointCha
                 </Link>
               </div>
 
+              {/* New to Berkeley button */}
+              <button
+                onClick={() => setShowOnboarding(true)}
+                className="inline-flex items-center gap-1.5 text-xs text-white/50 hover:text-gold mt-4 bg-transparent border-none cursor-pointer transition-colors"
+              >
+                <HelpCircle size={13} />
+                New to Berkeley? Learn how subletting works
+              </button>
+
               {/* Stats */}
-              <div className="grid grid-cols-3 gap-6 mt-12 max-w-md">
+              <div className="grid grid-cols-3 gap-6 mt-8 max-w-md">
                 <div>
                   <p className="font-display text-2xl md:text-3xl text-gold italic">{listings.length}+</p>
                   <p className="text-xs text-white/40 mt-1">Active Listings</p>
@@ -156,14 +169,23 @@ export default function HomePage({ listings, referencePoint, onReferencePointCha
       {/* Value Props */}
       <div className="bg-white border-b border-dark/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-gold/10 rounded-lg flex items-center justify-center shrink-0">
-                <Shield size={20} className="text-gold" />
+                <Users size={20} className="text-gold" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-dark">Verified & Trusted</h3>
-                <p className="text-xs text-dark/50 mt-0.5">Berkeley email required. Free landlord verification badges.</p>
+                <h3 className="text-sm font-bold text-dark">Mutual Connections</h3>
+                <p className="text-xs text-dark/50 mt-0.5">See shared clubs, orgs, and friends. Trust people you know.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 bg-gold/10 rounded-lg flex items-center justify-center shrink-0">
+                <Award size={20} className="text-gold" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-dark">Vouches & Reviews</h3>
+                <p className="text-xs text-dark/50 mt-0.5">Real Cal students vouch for listers. Double-blind reviews.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
@@ -171,17 +193,17 @@ export default function HomePage({ listings, referencePoint, onReferencePointCha
                 <FileText size={20} className="text-gold" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-dark">Free Sublease Templates</h3>
-                <p className="text-xs text-dark/50 mt-0.5">CA-compliant agreement templates at no cost.</p>
+                <h3 className="text-sm font-bold text-dark">Legal Protection</h3>
+                <p className="text-xs text-dark/50 mt-0.5">Auto-generated CA-compliant sublease agreements. Berkeley Rent Board compliance checks.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 bg-gold/10 rounded-lg flex items-center justify-center shrink-0">
-                <Zap size={20} className="text-gold" />
+                <Shield size={20} className="text-gold" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-dark">Semester-Aligned</h3>
-                <p className="text-xs text-dark/50 mt-0.5">Listings match Berkeley's academic calendar automatically.</p>
+                <h3 className="text-sm font-bold text-dark">Scam Protection</h3>
+                <p className="text-xs text-dark/50 mt-0.5">Verified @berkeley.edu emails. Price and listing anomaly detection.</p>
               </div>
             </div>
           </div>
@@ -240,6 +262,12 @@ export default function HomePage({ listings, referencePoint, onReferencePointCha
           />
         )}
       </div>
+
+      {/* Onboarding modal for new users */}
+      <NewToBerkeleyModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
     </div>
   );
 }

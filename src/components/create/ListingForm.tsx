@@ -1,19 +1,30 @@
 import { useState, useEffect } from 'react';
 import type { Listing } from '../../types/listing';
-import { DollarSign, MapPin, Calendar, User, FileText, Home, Briefcase, ClipboardList, Type, Sofa, Plug, Users } from 'lucide-react';
+import { DollarSign, MapPin, Calendar, User, FileText, Home, Briefcase, ClipboardList, Type, Sofa, Plug, Users, PawPrint, Maximize2, Sparkles, Mail, Phone } from 'lucide-react';
 import LocationPicker from './LocationPicker';
+import PriceSuggestion from './PriceSuggestion';
+import RentComplianceBanner from './RentComplianceBanner';
+import LandlordApprovalTracker from './LandlordApprovalTracker';
 import { DEFAULT_LISTING_IMAGE, DEFAULT_LISTING_IMAGES } from '../../data/seedListings';
 import { SEMESTER_DATES, getMatchingSemesters, getCombinedDateRange } from '../../utils/semesterDates';
 import { getSemesterColors } from '../../utils/semester';
+import { useUserProfile } from '../../contexts/UserProfileContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Props {
   onSubmit: (listing: Listing) => void;
+  allListings?: Listing[];
 }
 
-export default function ListingForm({ onSubmit }: Props) {
+export default function ListingForm({ onSubmit, allListings = [] }: Props) {
+  const { profile } = useUserProfile();
+  const { user } = useAuth();
   const [title, setTitle] = useState('');
-  const [listerName, setListerName] = useState('');
+  const [listerName, setListerName] = useState(profile?.displayName ?? '');
   const [listerRelationship, setListerRelationship] = useState('Tenant');
+  const [contactEmail, setContactEmail] = useState(user?.email ?? '');
+  const [contactPhone, setContactPhone] = useState('');
+  const [landlordApproval, setLandlordApproval] = useState<string>('pending');
   const [price, setPrice] = useState('');
   const [bedrooms, setBedrooms] = useState('1');
   const [bathrooms, setBathrooms] = useState('1');
@@ -27,6 +38,11 @@ export default function ListingForm({ onSubmit }: Props) {
   const [furnished, setFurnished] = useState(false);
   const [utilitiesIncluded, setUtilitiesIncluded] = useState(false);
   const [roommates, setRoommates] = useState('0');
+  const [listerBio, setListerBio] = useState('');
+  const [genderPreference, setGenderPreference] = useState('any');
+  const [roomSize, setRoomSize] = useState('');
+  const [petPolicy, setPetPolicy] = useState('no-pets');
+  const [highlightsText, setHighlightsText] = useState('');
   const [showPicker, setShowPicker] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [geocoding, setGeocoding] = useState(false);
@@ -123,12 +139,27 @@ export default function ListingForm({ onSubmit }: Props) {
       listerRelationship,
       description: description.trim(),
       rentalRequirements: rentalRequirements.trim(),
-      contactEmail: '',
-      contactPhone: '',
+      contactEmail: contactEmail.trim(),
+      contactPhone: contactPhone.trim(),
       createdAt: new Date().toISOString(),
       furnished,
       utilitiesIncluded,
       roommates: parseInt(roommates),
+      listerProfilePic: profile?.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(listerName.trim())}&background=003262&color=FDB515&size=128`,
+      listerBio: listerBio.trim() || undefined,
+      genderPreference: genderPreference as Listing['genderPreference'],
+      roomSize: roomSize.trim() || undefined,
+      petPolicy: petPolicy as Listing['petPolicy'],
+      highlights: highlightsText.trim()
+        ? highlightsText.split(',').map((h) => h.trim()).filter(Boolean)
+        : undefined,
+      // Trust & profile data
+      listerId: profile?.id,
+      verificationTier: profile?.verificationTier,
+      listerAffiliations: profile?.affiliations.map(a => a.name),
+      vouchCount: profile?.vouches.length ?? 0,
+      landlordApprovalStatus: landlordApproval as Listing['landlordApprovalStatus'],
+      neighborhoodSlug: undefined, // auto-assigned by neighborhood lookup
     };
 
     onSubmit(listing);
@@ -193,6 +224,49 @@ export default function ListingForm({ onSubmit }: Props) {
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-dark/40">/month</span>
           </div>
           {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
+          {/* Smart pricing suggestion */}
+          {coords && (
+            <PriceSuggestion
+              price={price ? parseFloat(price) : null}
+              bedrooms={parseInt(bedrooms)}
+              lat={coords.lat}
+              lng={coords.lng}
+              listings={allListings}
+            />
+          )}
+        </div>
+
+        {/* Rent compliance check */}
+        {price && parseFloat(price) > 0 && (
+          <RentComplianceBanner price={parseFloat(price)} bedrooms={parseInt(bedrooms)} />
+        )}
+
+        {/* Contact Info */}
+        <div className="bg-cream rounded-xl p-4 border border-dark/5">
+          <label className="block text-sm font-medium text-dark mb-3">Contact Information</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="relative">
+              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark/30" />
+              <input
+                type="email"
+                placeholder="your.email@berkeley.edu"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                className={inputClasses}
+              />
+            </div>
+            <div className="relative">
+              <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark/30" />
+              <input
+                type="tel"
+                placeholder="(510) 555-0100"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+                className={inputClasses}
+              />
+            </div>
+          </div>
+          <p className="text-[10px] text-dark/40 mt-2">Your email is pre-filled from your account. At least one contact method is required.</p>
         </div>
 
         {/* Bedrooms & Bathrooms */}
@@ -268,6 +342,87 @@ export default function ListingForm({ onSubmit }: Props) {
               <option value="3">3 roommates</option>
               <option value="4">4+ roommates</option>
             </select>
+          </div>
+        </div>
+
+        {/* About You */}
+        <div>
+          <label className="block text-sm font-medium text-dark mb-1.5">
+            About You <span className="text-dark/40 font-normal ml-1">(optional — helps subleasers connect with you)</span>
+          </label>
+          <div className="relative">
+            <User size={16} className="absolute left-3 top-3.5 text-dark/30" />
+            <textarea
+              placeholder="e.g. Junior, Data Science. Going abroad this fall — take care of my cozy spot!"
+              value={listerBio}
+              onChange={(e) => setListerBio(e.target.value)}
+              rows={2}
+              className="w-full pl-9 pr-4 py-3 text-base border border-dark/12 rounded-xl focus:outline-none focus:border-gold focus:ring-2 focus:ring-gold/20 bg-white text-dark resize-y"
+            />
+          </div>
+        </div>
+
+        {/* Gender, Room Size, Pet Policy row */}
+        <div className="bg-cream rounded-xl p-4 border border-dark/5">
+          <label className="block text-sm font-medium text-dark mb-3">Room Details</label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="flex items-center gap-1.5 text-xs text-dark/60 mb-1.5">
+                <Users size={12} /> Gender Preference
+              </label>
+              <select
+                value={genderPreference}
+                onChange={(e) => setGenderPreference(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold bg-white text-dark cursor-pointer"
+              >
+                <option value="any">No preference</option>
+                <option value="women-only">Women only</option>
+                <option value="men-only">Men only</option>
+              </select>
+            </div>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs text-dark/60 mb-1.5">
+                <Maximize2 size={12} /> Room Size
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. 10x12"
+                value={roomSize}
+                onChange={(e) => setRoomSize(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold bg-white text-dark"
+              />
+            </div>
+            <div>
+              <label className="flex items-center gap-1.5 text-xs text-dark/60 mb-1.5">
+                <PawPrint size={12} /> Pet Policy
+              </label>
+              <select
+                value={petPolicy}
+                onChange={(e) => setPetPolicy(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-dark/12 rounded-lg focus:outline-none focus:border-gold bg-white text-dark cursor-pointer"
+              >
+                <option value="no-pets">No pets</option>
+                <option value="allowed">Pets allowed</option>
+                <option value="negotiable">Negotiable</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Highlights */}
+        <div>
+          <label className="block text-sm font-medium text-dark mb-1.5">
+            Highlights <span className="text-dark/40 font-normal ml-1">(comma-separated, optional)</span>
+          </label>
+          <div className="relative">
+            <Sparkles size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-dark/30" />
+            <input
+              type="text"
+              placeholder="e.g. In-unit laundry, Near BART, Rooftop deck"
+              value={highlightsText}
+              onChange={(e) => setHighlightsText(e.target.value)}
+              className={inputClasses}
+            />
           </div>
         </div>
 
@@ -372,6 +527,12 @@ export default function ListingForm({ onSubmit }: Props) {
             />
           </div>
         </div>
+
+        {/* Landlord Approval */}
+        <LandlordApprovalTracker
+          status={landlordApproval as 'pending' | 'approved' | 'not-required'}
+          onChange={setLandlordApproval}
+        />
 
         {/* Submit */}
         <button

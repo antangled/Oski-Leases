@@ -1,0 +1,120 @@
+import type { Review } from '../types/user';
+
+export const seedReviews: Review[] = [
+  {
+    id: 'review-01',
+    listingId: 'seed-01',
+    reviewerId: 'user-david',
+    reviewerName: 'David Park',
+    reviewerProfilePic: 'https://ui-avatars.com/api/?name=David+Park&background=003262&color=FDB515&size=128',
+    rating: 5,
+    accuracy: 5,
+    communication: 5,
+    cleanliness: 5,
+    value: 4,
+    text: 'Sarah\'s place was exactly as described — clean, bright, and perfectly located. She was super responsive and made the whole handoff seamless. Would absolutely sublease from her again.',
+    createdAt: '2025-12-20T00:00:00Z',
+  },
+  {
+    id: 'review-02',
+    listingId: 'seed-01',
+    reviewerId: 'user-grace',
+    reviewerName: 'Grace Liu',
+    reviewerProfilePic: 'https://ui-avatars.com/api/?name=Grace+Liu&background=003262&color=FDB515&size=128',
+    rating: 5,
+    accuracy: 5,
+    communication: 5,
+    cleanliness: 4,
+    value: 5,
+    text: 'Great apartment, great location. Sarah left detailed instructions for everything. The laundry in-unit is a huge plus. Only minor thing — the kitchen could use a few more pots.',
+    createdAt: '2025-08-15T00:00:00Z',
+  },
+  {
+    id: 'review-03',
+    listingId: 'seed-02',
+    reviewerId: 'user-hannah',
+    reviewerName: 'Hannah Adler',
+    reviewerProfilePic: 'https://ui-avatars.com/api/?name=Hannah+Adler&background=003262&color=FDB515&size=128',
+    rating: 4,
+    accuracy: 4,
+    communication: 5,
+    cleanliness: 4,
+    value: 5,
+    text: 'Marcus\'s studio is a great deal for the price. Fully furnished and WiFi included makes it perfect for a short stay. The building laundry is a bit slow but totally fine.',
+    createdAt: '2025-11-10T00:00:00Z',
+  },
+  {
+    id: 'review-04',
+    listingId: 'seed-03',
+    reviewerId: 'user-sarah',
+    reviewerName: 'Sarah Chen',
+    reviewerProfilePic: 'https://ui-avatars.com/api/?name=Sarah+Chen&background=003262&color=FDB515&size=128',
+    rating: 5,
+    accuracy: 5,
+    communication: 4,
+    cleanliness: 5,
+    value: 4,
+    text: 'Emily\'s place on Bancroft is gorgeous — the renovation is amazing. The grad student roommate is super quiet and respectful. Only heads up: utilities add ~$150/mo on top of rent.',
+    createdAt: '2025-10-05T00:00:00Z',
+  },
+  {
+    id: 'review-05',
+    listingId: 'seed-03',
+    reviewerId: 'user-mia',
+    reviewerName: 'Mia Thompson',
+    reviewerProfilePic: 'https://ui-avatars.com/api/?name=Mia+Thompson&background=003262&color=FDB515&size=128',
+    rating: 4,
+    accuracy: 5,
+    communication: 4,
+    cleanliness: 5,
+    value: 3,
+    text: 'Beautiful apartment with great natural light. Emily was responsive and helpful. A bit pricey but the quality is worth it if you can afford it.',
+    createdAt: '2025-09-20T00:00:00Z',
+  },
+  {
+    id: 'review-06',
+    listingId: 'seed-03',
+    reviewerId: 'user-marcus',
+    reviewerName: 'Marcus Johnson',
+    reviewerProfilePic: 'https://ui-avatars.com/api/?name=Marcus+Johnson&background=003262&color=FDB515&size=128',
+    rating: 5,
+    accuracy: 5,
+    communication: 5,
+    cleanliness: 5,
+    value: 4,
+    text: 'Top-notch apartment. Emily is one of the most organized subletters I\'ve dealt with — had a whole binder of instructions. The Bancroft location can\'t be beat.',
+    createdAt: '2025-08-30T00:00:00Z',
+  },
+  {
+    id: 'review-07',
+    listingId: 'seed-18',
+    reviewerId: 'user-alex',
+    reviewerName: 'Alex Rivera',
+    reviewerProfilePic: 'https://ui-avatars.com/api/?name=Alex+Rivera&background=003262&color=FDB515&size=128',
+    rating: 4,
+    accuracy: 4,
+    communication: 5,
+    cleanliness: 4,
+    value: 4,
+    text: 'Hannah\'s place on Warring is cozy and the housemates are amazing — they genuinely cook together and welcomed me right in. The desk setup is perfect for studying.',
+    createdAt: '2025-12-01T00:00:00Z',
+  },
+];
+
+export function getReviewsForListing(listingId: string): Review[] {
+  return seedReviews.filter(r => r.listingId === listingId);
+}
+
+export function getReviewSummary(listingId: string): { averageRating: number; count: number; accuracy: number; communication: number; cleanliness: number; value: number } | null {
+  const reviews = getReviewsForListing(listingId);
+  if (reviews.length === 0) return null;
+  const count = reviews.length;
+  return {
+    averageRating: reviews.reduce((s, r) => s + r.rating, 0) / count,
+    count,
+    accuracy: reviews.reduce((s, r) => s + r.accuracy, 0) / count,
+    communication: reviews.reduce((s, r) => s + r.communication, 0) / count,
+    cleanliness: reviews.reduce((s, r) => s + r.cleanliness, 0) / count,
+    value: reviews.reduce((s, r) => s + r.value, 0) / count,
+  };
+}

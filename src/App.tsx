@@ -18,6 +18,9 @@ const AdminDashboard = ADMIN_ENABLED
   ? lazy(() => import('./components/admin/AdminDashboard'))
   : null;
 
+const ComparisonView = lazy(() => import('./components/compare/ComparisonView'));
+const MoveChecklist = lazy(() => import('./components/checklist/MoveChecklist'));
+
 export default function App() {
   const { listings, addListing } = useListings();
   const { referencePoint, updateReferencePoint } = useReferencePoint();
@@ -64,11 +67,27 @@ export default function App() {
             }
           />
           <Route
+            path="/compare"
+            element={
+              <Suspense fallback={<div className="p-8 text-center text-dark/50">Loading...</div>}>
+                <ComparisonView allListings={listings} referencePoint={referencePoint} />
+              </Suspense>
+            }
+          />
+          <Route
             path="/create"
             element={
               <ProtectedRoute>
-                <CreateListingView onAddListing={addListing} />
+                <CreateListingView onAddListing={addListing} allListings={listings} />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checklist"
+            element={
+              <Suspense fallback={<div className="p-8 text-center text-dark/50">Loading...</div>}>
+                <MoveChecklist mode="move-in" />
+              </Suspense>
             }
           />
           <Route path="/login" element={<LoginPage />} />

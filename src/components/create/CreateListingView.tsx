@@ -6,9 +6,10 @@ import { CheckCircle, Home } from 'lucide-react';
 
 interface Props {
   onAddListing: (listing: Listing) => void;
+  allListings?: Listing[];
 }
 
-export default function CreateListingView({ onAddListing }: Props) {
+export default function CreateListingView({ onAddListing, allListings }: Props) {
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
 
@@ -38,7 +39,7 @@ export default function CreateListingView({ onAddListing }: Props) {
         </div>
       ) : (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-dark/8">
-          <ListingForm onSubmit={handleSubmit} />
+          <ListingForm onSubmit={handleSubmit} allListings={allListings} />
         </div>
       )}
     </div>

@@ -1,3 +1,5 @@
+import type { RoommateProfile, FurnishingItem, VerificationTier, ReviewSummary } from './user';
+
 export interface Listing {
   id: string;
   title: string;
@@ -27,6 +29,27 @@ export interface Listing {
   roommates?: number;
   isBoosted?: boolean;
   isVerified?: boolean;
+  listerProfilePic?: string;
+  listerBio?: string;
+  genderPreference?: 'women-only' | 'men-only' | 'any';
+  roomSize?: string;
+  highlights?: string[];
+  petPolicy?: 'allowed' | 'no-pets' | 'negotiable';
+  floorPlanUrl?: string;
+  // Trust & social fields
+  listerId?: string;
+  verificationTier?: VerificationTier;
+  listerAffiliations?: string[];
+  vouchCount?: number;
+  reviewSummary?: ReviewSummary;
+  // Enhanced listing fields
+  roommateProfiles?: RoommateProfile[];
+  furnishingChecklist?: FurnishingItem[];
+  totalEstimatedCost?: number;
+  neighborhoodSlug?: string;
+  landlordApprovalStatus?: 'pending' | 'approved' | 'not-required';
+  moveInFlexible?: boolean;
+  moveOutFlexible?: boolean;
 }
 
 export interface EnrichedListing extends Listing {
@@ -41,6 +64,11 @@ export interface FilterState {
   distanceMax: number | null;
   dateStart: string | null;
   dateEnd: string | null;
+  genderPreference: 'women-only' | 'men-only' | 'any' | null;
+  furnished: boolean | null;
+  verifiedOnly: boolean;
+  petFriendly: boolean;
+  neighborhood: string | null;
 }
 
 export type SortOption =

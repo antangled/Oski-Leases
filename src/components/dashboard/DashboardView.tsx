@@ -19,6 +19,11 @@ export default function DashboardView({ allListings, referencePoint, isSaved, to
     useFilters(allListings, referencePoint);
   const [selectedListing, setSelectedListing] = useState<EnrichedListing | null>(null);
 
+  // Separate boosted listings for featured treatment (first 2 max)
+  const boostedListings = listings.filter((l) => l.isBoosted).slice(0, 2);
+  const boostedIds = new Set(boostedListings.map((l) => l.id));
+  const regularListings = listings.filter((l) => !boostedIds.has(l.id));
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <div>
@@ -48,12 +53,26 @@ export default function DashboardView({ allListings, referencePoint, isSaved, to
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-          {listings.map((listing, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Featured / boosted cards — full width */}
+          {boostedListings.map((listing, index) => (
             <ListingCard
               key={listing.id}
               listing={listing}
-              rank={index + 1}
+              rank={listings.indexOf(listing) + 1}
+              variant="featured"
+              onClick={() => setSelectedListing(listing)}
+              isSaved={isSaved?.(listing.id)}
+              onToggleSaved={toggleSaved}
+            />
+          ))}
+
+          {/* Regular cards — 2 columns */}
+          {regularListings.map((listing) => (
+            <ListingCard
+              key={listing.id}
+              listing={listing}
+              rank={listings.indexOf(listing) + 1}
               onClick={() => setSelectedListing(listing)}
               isSaved={isSaved?.(listing.id)}
               onToggleSaved={toggleSaved}
