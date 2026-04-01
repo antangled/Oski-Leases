@@ -1,4 +1,4 @@
-import type { UserProfile } from '../types/user';
+import type { UserProfile, NarrativeReference } from '../types/user';
 
 export const seedProfiles: UserProfile[] = [
   {
@@ -23,6 +23,18 @@ export const seedProfiles: UserProfile[] = [
     ],
     reviewCount: 2,
     createdAt: '2025-09-01T00:00:00Z',
+    apartmentStory: 'I found this place sophomore year and instantly loved the light — the whole living room glows golden in the afternoon. I spent countless study sessions at my desk by the window. The in-unit laundry has saved me so many trips. I want someone who will appreciate the little things about this space.',
+    idealSubletter: 'Someone tidy and respectful of the neighbors. Bonus points if you like morning coffee on the fire escape. I am leaving some plants — would love someone who will water them!',
+    conversationStarters: [
+      { prompt: 'Ask me about', answer: 'the afternoon light in the living room' },
+      { prompt: 'Best nearby spot', answer: 'Yali\'s Cafe on Telegraph for studying' },
+      { prompt: 'Something I wish I knew', answer: 'the laundry runs quieter on the gentle cycle' },
+    ],
+    friendIds: ['user-marcus', 'user-emily', 'user-hannah', 'user-mia'],
+    narrativeRefs: [
+      { id: 'nref-01', fromUserId: 'user-david', fromName: 'David Park', fromProfilePic: 'https://ui-avatars.com/api/?name=David+Park&background=003262&color=FDB515&size=128', wouldSubletAgain: true, narrative: 'Sarah left the apartment spotless and even left a welcome note with wifi info and restaurant recs. Made the whole transition completely seamless. Would absolutely sublet from her again.', createdAt: '2025-12-20T00:00:00Z' },
+      { id: 'nref-02', fromUserId: 'user-grace', fromName: 'Grace Liu', fromProfilePic: 'https://ui-avatars.com/api/?name=Grace+Liu&background=003262&color=FDB515&size=128', wouldSubletAgain: true, narrative: 'The apartment was exactly as Sarah described — clean, bright, and the laundry is a life-saver. She was super responsive to every question I had before moving in. Felt like I was staying at a friend\'s place, not a stranger\'s.', createdAt: '2025-08-15T00:00:00Z' },
+    ],
   },
   {
     id: 'user-marcus',
@@ -44,6 +56,13 @@ export const seedProfiles: UserProfile[] = [
     ],
     reviewCount: 1,
     createdAt: '2025-09-15T00:00:00Z',
+    apartmentStory: 'Perfect little studio for a focused student. I furnished it with everything you need — desk, bed, dresser. The building laundry is two floors down. Telegraph has every food option you could want within a 2-minute walk.',
+    idealSubletter: 'Anyone who keeps things clean and doesn\'t blast music late at night. The walls are thin but the neighbors are chill.',
+    conversationStarters: [
+      { prompt: 'Ask me about', answer: 'the best late-night food spots on Telegraph' },
+      { prompt: 'My favorite thing about this place', answer: 'falling asleep to the sound of rain on the skylight' },
+    ],
+    friendIds: ['user-sarah', 'user-david', 'user-emily'],
   },
   {
     id: 'user-emily',
@@ -65,6 +84,12 @@ export const seedProfiles: UserProfile[] = [
     ],
     reviewCount: 3,
     createdAt: '2025-08-20T00:00:00Z',
+    apartmentStory: 'This Bancroft apartment is my pride and joy — just renovated with quartz counters and modern appliances. The roommate situation is ideal: Yuki is a quiet grad student who mostly works late at the studio. We respect each other\'s space and cook together on weekends.',
+    idealSubletter: 'Someone who appreciates good design and keeps shared spaces tidy. My roommate Yuki is quiet and easy-going — please be respectful of that vibe.',
+    friendIds: ['user-sarah', 'user-david', 'user-hannah', 'user-grace'],
+    narrativeRefs: [
+      { id: 'nref-03', fromUserId: 'user-sarah', fromName: 'Sarah Chen', fromProfilePic: 'https://ui-avatars.com/api/?name=Sarah+Chen&background=003262&color=FDB515&size=128', wouldSubletAgain: true, narrative: 'Emily\'s place is as beautiful as the photos — maybe even better. The renovation quality is obvious. Yuki was a great roommate. Emily had everything labeled and organized for the handoff. Total pro.', createdAt: '2025-10-05T00:00:00Z' },
+    ],
   },
   {
     id: 'user-david',
@@ -87,6 +112,13 @@ export const seedProfiles: UserProfile[] = [
     ],
     reviewCount: 0,
     createdAt: '2025-10-01T00:00:00Z',
+    apartmentStory: 'This house is more than an apartment — it\'s a community. We do game nights every Thursday, BBQs on sunny days, and the backyard is the best hangout spot on Channing. Jake and Kevin are the most welcoming roommates you could ask for.',
+    idealSubletter: 'Someone social who wants to actually hang out with the house. We\'re not looking for someone who just locks themselves in their room. Game night attendance is strongly encouraged.',
+    conversationStarters: [
+      { prompt: 'House tradition', answer: 'Thursday game nights — we\'re currently deep into Catan' },
+      { prompt: 'Best part of this house', answer: 'the backyard BBQ setup, hands down' },
+    ],
+    friendIds: ['user-marcus', 'user-emily', 'user-sarah'],
   },
   {
     id: 'user-hannah',

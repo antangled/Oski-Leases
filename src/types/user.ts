@@ -1,6 +1,30 @@
 export type VerificationTier = 'bronze' | 'silver' | 'gold';
 export type TrustLevel = 'new-bear' | 'trusted-bear' | 'golden-bear';
 
+// New organic trust model
+export type ConnectionStrength = 'mutual' | 'connected' | 'community' | 'none';
+
+export interface TrustPath {
+  strength: ConnectionStrength;
+  path: { id: string; name: string; profilePic?: string }[];
+  sharedGroups: string[];
+}
+
+export interface NarrativeReference {
+  id: string;
+  fromUserId: string;
+  fromName: string;
+  fromProfilePic?: string;
+  wouldSubletAgain: boolean;
+  narrative: string;
+  createdAt: string;
+}
+
+export interface ConversationStarter {
+  prompt: string;
+  answer: string;
+}
+
 export type AffiliationType = 'greek' | 'coop' | 'club' | 'major' | 'dorm' | 'sport';
 
 export interface CommunityAffiliation {
@@ -66,6 +90,12 @@ export interface UserProfile {
   vouches: Vouch[];
   reviewCount: number;
   createdAt: string;
+  // New organic trust fields
+  apartmentStory?: string;
+  idealSubletter?: string;
+  conversationStarters?: ConversationStarter[];
+  narrativeRefs?: NarrativeReference[];
+  friendIds?: string[];
 }
 
 export interface NeighborhoodInfo {

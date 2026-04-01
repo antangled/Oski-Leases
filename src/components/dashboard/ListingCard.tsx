@@ -1,6 +1,8 @@
 import type { EnrichedListing } from '../../types/listing';
 import { getSemester, getSemesterColors } from '../../utils/semester';
-import { Heart, Star, Zap, MapPin, Calendar, Sparkles, ShieldCheck, ShieldAlert, Award } from 'lucide-react';
+import { Heart, Star, Zap, MapPin, Calendar, Sparkles, Users, Link2 } from 'lucide-react';
+import { useUserProfile } from '../../contexts/UserProfileContext';
+import { computeTrustPath, getConnectionLabel, getConnectionColor } from '../../utils/trustPath';
 
 interface Props {
   listing: EnrichedListing;
@@ -35,26 +37,17 @@ function GenderBadge({ pref }: { pref?: string }) {
   return null;
 }
 
-function VerificationPill({ tier }: { tier?: string; verified?: boolean }) {
-  if (tier === 'gold') return (
-    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200">
-      <Award size={9} className="text-amber-500" />
-      Gold
+function ConnectionPill({ strength, label }: { strength: string; label: string }) {
+  if (strength === 'none') return null;
+  const colorClasses = getConnectionColor(strength as any);
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${colorClasses}`}>
+      {strength === 'mutual' && <Users size={9} />}
+      {strength === 'connected' && <Link2 size={9} />}
+      {strength === 'community' && <Users size={9} />}
+      {label}
     </span>
   );
-  if (tier === 'silver') return (
-    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded-full border border-slate-200">
-      <ShieldCheck size={9} className="text-slate-500" />
-      Verified
-    </span>
-  );
-  if (tier === 'bronze') return (
-    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-dark/40 bg-dark/5 px-1.5 py-0.5 rounded-full">
-      <ShieldAlert size={9} />
-      Basic
-    </span>
-  );
-  return null;
 }
 
 function ReviewStars({ rating, count }: { rating: number; count: number }) {
@@ -68,6 +61,7 @@ function ReviewStars({ rating, count }: { rating: number; count: number }) {
 }
 
 export default function ListingCard({ listing, rank, onClick, isSaved, onToggleSaved, variant = 'default' }: Props) {
+  const { profile, allProfiles } = useUserProfile();
   const isBestMatch = rank <= 3;
   const semester = getSemester(listing.availability.start);
   const semColors = getSemesterColors(semester);
@@ -76,6 +70,10 @@ export default function ListingCard({ listing, rank, onClick, isSaved, onToggleS
 
   const profilePic = listing.listerProfilePic
     || `https://ui-avatars.com/api/?name=${encodeURIComponent(listing.listerName)}&background=003262&color=FDB515&size=128`;
+
+  // Compute trust connection
+  const trustPath = listing.listerId ? computeTrustPath(profile, listing.listerId, allProfiles) : null;
+  const connectionLabel = trustPath ? getConnectionLabel(trustPath.strength) : '';
 
   if (variant === 'featured') {
     return (
@@ -132,7 +130,7 @@ export default function ListingCard({ listing, rank, onClick, isSaved, onToggleS
             )}
 
             {/* Lister strip */}
-            <ListerStrip listing={listing} profilePic={profilePic} />
+            <ListerStrip listing={listing} profilePic={profilePic} connectionStrength={trustPath?.strength} connectionLabel={connectionLabel} />
 
             <div className="mt-3 flex-1">
               {/* Price */}
@@ -243,7 +241,7 @@ export default function ListingCard({ listing, rank, onClick, isSaved, onToggleS
       )}
 
       {/* Lister identity strip */}
-      <ListerStrip listing={listing} profilePic={profilePic} />
+      <ListerStrip listing={listing} profilePic={profilePic} connectionStrength={trustPath?.strength} connectionLabel={connectionLabel} />
 
       {/* Compact info — 35% of card */}
       <div className="px-4 pb-4">
@@ -296,13 +294,17 @@ export default function ListingCard({ listing, rank, onClick, isSaved, onToggleS
 
 /* ── Sub-components ───────────────────── */
 
-function ListerStrip({ listing, profilePic }: { listing: EnrichedListing; profilePic: string }) {
+function ListerStrip({ listing, profilePic, connectionStrength, connectionLabel }: { listing: EnrichedListing; profilePic: string; connectionStrength?: string; connectionLabel?: string }) {
   return (
     <div className="flex items-center gap-2.5 px-4 py-2.5 border-b border-dark/5">
       <img
         src={profilePic}
         alt={listing.listerName}
-        className="w-8 h-8 rounded-full object-cover border-2 border-gold/30"
+        className={`w-8 h-8 rounded-full object-cover border-2 ${
+          connectionStrength === 'mutual' ? 'border-amber-400 ring-2 ring-amber-200/50' :
+          connectionStrength === 'connected' ? 'border-amber-300 ring-1 ring-amber-200/30' :
+          'border-gold/30'
+        }`}
       />
       <div className="flex items-center gap-1.5 min-w-0 flex-1">
         <span className="text-sm font-semibold text-dark truncate">{listing.listerName}</span>
@@ -311,16 +313,14 @@ function ListerStrip({ listing, profilePic }: { listing: EnrichedListing; profil
             {listing.listerRelationship}
           </span>
         )}
-        <VerificationPill tier={listing.verificationTier} verified={listing.isVerified} />
+        {connectionStrength && connectionStrength !== 'none' && (
+          <ConnectionPill strength={connectionStrength} label={connectionLabel || ''} />
+        )}
       </div>
-      {/* Review rating */}
-      {listing.reviewSummary && listing.reviewSummary.count > 0 && (
-        <ReviewStars rating={listing.reviewSummary.averageRating} count={listing.reviewSummary.count} />
-      )}
-      {/* Vouch count */}
+      {/* Vouch count — now shows named people, not just numbers */}
       {listing.vouchCount != null && listing.vouchCount > 0 && (
-        <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full font-medium shrink-0">
-          {listing.vouchCount} vouch{listing.vouchCount !== 1 ? 'es' : ''}
+        <span className="text-[10px] text-dark/50 shrink-0">
+          {listing.vouchCount} people vouch
         </span>
       )}
     </div>

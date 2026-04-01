@@ -15,6 +15,11 @@ import {
   FileText, UserCheck,
 } from 'lucide-react';
 import { getNeighborhood } from '../../utils/neighborhoodLookup';
+import { computeTrustPath } from '../../utils/trustPath';
+import TrustPathDisplay from '../trust/TrustPathDisplay';
+import NarrativeRefSection from '../trust/NarrativeRefSection';
+import AskForIntroButton from '../trust/AskForIntroButton';
+import ConversationStarters from '../trust/ConversationStarters';
 
 interface Props {
   listing: EnrichedListing;
@@ -36,7 +41,7 @@ export default function ListingDetailModal({ listing, onClose, isSaved, onToggle
   const [reviewsExpanded, setReviewsExpanded] = useState(false);
   const [showAgreement, setShowAgreement] = useState(false);
 
-  const { profile, getProfileById } = useUserProfile();
+  const { profile, allProfiles, getProfileById } = useUserProfile();
 
   const images = listing.images.length > 0 ? listing.images : [listing.imageUrl];
   const semester = getSemester(listing.availability.start);
@@ -48,6 +53,7 @@ export default function ListingDetailModal({ listing, onClose, isSaved, onToggle
 
   // Trust data
   const listerProfile = listing.listerId ? getProfileById(listing.listerId) : null;
+  const trustPath = listing.listerId ? computeTrustPath(profile, listing.listerId, allProfiles) : null;
   const scamFlags = getScamFlags(listing, seedListings);
   const reviews = getReviewsForListing(listing.id);
   const reviewSummary = getReviewSummary(listing.id);
@@ -413,13 +419,31 @@ export default function ListingDetailModal({ listing, onClose, isSaved, onToggle
             </div>
           )}
 
+          {/* Trust path — your connection to this lister */}
+          {trustPath && trustPath.strength !== 'none' && (
+            <div className="mb-5">
+              <TrustPathDisplay trustPath={trustPath} />
+            </div>
+          )}
+
+          {/* Ask for intro — if friend-of-friend */}
+          {trustPath && (
+            <div className="mb-5">
+              <AskForIntroButton trustPath={trustPath} listerName={listing.listerName} />
+            </div>
+          )}
+
           {/* Lister profile section */}
           <div className="bg-cream rounded-xl p-4 mb-5 border border-dark/5">
             <div className="flex items-start gap-3">
               <img
                 src={profilePic}
                 alt={listing.listerName}
-                className="w-12 h-12 rounded-full object-cover border-2 border-gold/30 shrink-0"
+                className={`w-12 h-12 rounded-full object-cover shrink-0 border-2 ${
+                  trustPath?.strength === 'mutual' ? 'border-amber-400 ring-2 ring-amber-200/50' :
+                  trustPath?.strength === 'connected' ? 'border-amber-300 ring-1 ring-amber-200/30' :
+                  'border-gold/30'
+                }`}
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -429,40 +453,61 @@ export default function ListingDetailModal({ listing, onClose, isSaved, onToggle
                       {listing.listerRelationship}
                     </span>
                   )}
-                  {listing.verificationTier === 'gold' && (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200">
-                      <Award size={9} /> Gold Verified
-                    </span>
-                  )}
-                  {listing.verificationTier === 'silver' && (
-                    <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded-full border border-slate-200">
-                      <ShieldCheck size={9} /> Verified
-                    </span>
-                  )}
-                  {!listing.verificationTier && listing.isVerified && (
-                    <Shield size={14} className="text-emerald-500" />
-                  )}
                 </div>
-                {/* Affiliations */}
+                {/* Affiliations as shared context */}
                 {listing.listerAffiliations && listing.listerAffiliations.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-2">
-                    {listing.listerAffiliations.map(a => (
-                      <span key={a} className="text-[9px] font-medium text-dark/40 bg-dark/5 px-1.5 py-0.5 rounded-full">
-                        {a}
-                      </span>
-                    ))}
+                    {listing.listerAffiliations.map(a => {
+                      const isShared = sharedAffiliations.some(sa => sa.name === a);
+                      return (
+                        <span key={a} className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full ${
+                          isShared ? 'text-amber-700 bg-amber-50 border border-amber-200' : 'text-dark/40 bg-dark/5'
+                        }`}>
+                          {isShared && '* '}{a}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
-                {/* Vouches */}
+                {/* Named vouches — not just a count */}
                 {listerProfile && listerProfile.vouches.length > 0 && (
-                  <p className="text-[11px] text-emerald-600 font-medium mb-1">
-                    Vouched for by {listerProfile.vouches.length} Cal student{listerProfile.vouches.length !== 1 ? 's' : ''}
-                  </p>
+                  <div className="mb-2">
+                    <p className="text-[11px] text-dark/50 mb-1">People who know {listing.listerName.split(' ')[0]}:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {listerProfile.vouches.map(v => (
+                        <span key={v.fromUserId} className="inline-flex items-center gap-1 text-[10px] text-dark/60 bg-white px-2 py-0.5 rounded-full border border-dark/10">
+                          <img
+                            src={v.fromProfilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(v.fromName)}&background=003262&color=FDB515&size=32`}
+                            alt={v.fromName}
+                            className="w-3.5 h-3.5 rounded-full"
+                          />
+                          {v.fromName.split(' ')[0]}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                {listing.listerBio && (
-                  <p className="text-sm text-dark/60 italic leading-relaxed mb-2">"{listing.listerBio}"</p>
+                {/* Apartment story — the human narrative */}
+                {listerProfile?.apartmentStory && (
+                  <div className="mb-2">
+                    <p className="text-[10px] font-semibold text-dark/40 uppercase mb-1">About this place</p>
+                    <p className="text-sm text-dark/60 leading-relaxed">{listerProfile.apartmentStory}</p>
+                  </div>
                 )}
-                <div className="space-y-1.5">
+                {/* What they're looking for */}
+                {listerProfile?.idealSubletter && (
+                  <div className="mb-2">
+                    <p className="text-[10px] font-semibold text-dark/40 uppercase mb-1">Looking for</p>
+                    <p className="text-sm text-dark/60 leading-relaxed italic">"{listerProfile.idealSubletter}"</p>
+                  </div>
+                )}
+                {/* Conversation starters */}
+                {listerProfile?.conversationStarters && (
+                  <div className="mb-2">
+                    <ConversationStarters starters={listerProfile.conversationStarters} listerName={listing.listerName} />
+                  </div>
+                )}
+                <div className="space-y-1.5 mt-3 pt-3 border-t border-dark/5">
                   {listing.contactEmail && (
                     <div className="flex items-center gap-2 text-sm text-dark/70">
                       <Mail size={13} className="text-gold shrink-0" />
@@ -480,57 +525,10 @@ export default function ListingDetailModal({ listing, onClose, isSaved, onToggle
             </div>
           </div>
 
-          {/* Reviews section */}
-          {reviews.length > 0 && (
-            <div className="border border-dark/10 rounded-xl overflow-hidden mb-3">
-              <button
-                onClick={() => setReviewsExpanded(!reviewsExpanded)}
-                className="w-full flex items-center justify-between px-4 py-3 bg-dark/[0.02] hover:bg-dark/[0.04] transition-colors cursor-pointer border-none text-left"
-              >
-                <span className="text-sm font-semibold text-dark flex items-center gap-2">
-                  <Star size={14} className="text-amber-400" fill="currentColor" />
-                  Reviews ({reviews.length})
-                  {reviewSummary && (
-                    <span className="text-xs text-dark/50 font-normal">
-                      — {reviewSummary.averageRating.toFixed(1)} avg
-                    </span>
-                  )}
-                </span>
-                {reviewsExpanded ? <ChevronUp size={16} className="text-dark/40" /> : <ChevronDown size={16} className="text-dark/40" />}
-              </button>
-              <div className={`transition-all duration-300 overflow-hidden ${reviewsExpanded ? 'max-h-[500px]' : 'max-h-0'}`}>
-                <div className="px-4 py-3 space-y-3 overflow-y-auto max-h-[480px]">
-                  {/* Category breakdown */}
-                  {reviewSummary && (
-                    <div className="grid grid-cols-4 gap-2 mb-3">
-                      {(['accuracy', 'communication', 'cleanliness', 'value'] as const).map((cat) => (
-                        <div key={cat} className="text-center">
-                          <p className="text-lg font-bold text-dark">{reviewSummary[cat].toFixed(1)}</p>
-                          <p className="text-[9px] text-dark/40 uppercase">{cat}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {reviews.map((review) => (
-                    <div key={review.id} className="bg-cream rounded-lg p-3 border border-dark/5">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        {review.reviewerProfilePic && (
-                          <img src={review.reviewerProfilePic} alt={review.reviewerName} className="w-6 h-6 rounded-full" />
-                        )}
-                        <span className="text-xs font-semibold text-dark">{review.reviewerName}</span>
-                        <span className="flex items-center gap-0.5 text-xs text-amber-500">
-                          <Star size={10} fill="currentColor" />
-                          {review.rating}
-                        </span>
-                        <span className="text-[10px] text-dark/30 ml-auto">
-                          {new Date(review.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-                        </span>
-                      </div>
-                      <p className="text-xs text-dark/60 leading-relaxed">{review.text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+          {/* Narrative references — what past subleasees say (replaces star ratings) */}
+          {listerProfile?.narrativeRefs && listerProfile.narrativeRefs.length > 0 && (
+            <div className="mb-5">
+              <NarrativeRefSection refs={listerProfile.narrativeRefs} listerName={listing.listerName} />
             </div>
           )}
 
